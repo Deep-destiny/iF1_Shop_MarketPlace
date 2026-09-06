@@ -2,6 +2,10 @@
 
 A responsive Expo React Native marketplace experience for shopping products with no-cost EMI plans backed by mutual funds.
 
+## Live Demo
+
+Visit the deployed web app: https://i-f1-shop-market-place.vercel.app/
+
 ## Features
 
 - Expo React Native app with web support
