@@ -13,6 +13,7 @@ import { colors, spacing } from '../theme/tokens';
 
 interface MarketplaceTabProps {
   onSelectProduct: (product: Product) => void;
+  onScroll?: (event: any) => void;
 }
 
 const CATEGORIES = [
@@ -23,7 +24,7 @@ const CATEGORIES = [
   { key: 'fashion', label: 'Fashion', icon: 'shirt-outline' },
 ];
 
-export function MarketplaceTab({ onSelectProduct }: MarketplaceTabProps) {
+export function MarketplaceTab({ onSelectProduct, onScroll }: MarketplaceTabProps) {
   const { width: screenWidth } = useWindowDimensions();
   const { state, retry } = useMarketplaceProducts();
   const [query, setQuery] = useState('');
@@ -123,6 +124,8 @@ export function MarketplaceTab({ onSelectProduct }: MarketplaceTabProps) {
             renderItem={({ item }) => (
               <ProductCard product={item} onPress={onSelectProduct} />
             )}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
             refreshControl={

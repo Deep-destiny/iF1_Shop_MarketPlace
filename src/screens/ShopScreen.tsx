@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Animated, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SegmentedToggle } from '../components/SegmentedToggle';
@@ -72,6 +72,24 @@ interface ShopScreenProps {
  */
 export function ShopScreen({ navigation }: ShopScreenProps) {
   const [activeSegment, setActiveSegment] = useState<ShopSegment>('marketplace');
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const isHeaderCollapsed = useRef(false);
+  const collapsibleHeaderHeight = scrollY.interpolate({
+    inputRange: [0, 180],
+    outputRange: [304, 0],
+    extrapolate: 'clamp',
+  });
+  const handleMarketplaceScroll = (event: any) => {
+    const shouldCollapse = event.nativeEvent.contentOffset.y > 24;
+    if (shouldCollapse === isHeaderCollapsed.current) return;
+
+    isHeaderCollapsed.current = shouldCollapse;
+    Animated.timing(scrollY, {
+      toValue: shouldCollapse ? 180 : 0,
+      duration: 220,
+      useNativeDriver: false,
+    }).start();
+  };
 
   const handleSelectProduct = (product: Product) => {
     if (navigation?.navigate) {
@@ -81,46 +99,51 @@ export function ShopScreen({ navigation }: ShopScreenProps) {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={[colors.gradientStart, colors.gradientEnd]}
-        style={styles.hero}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <View style={styles.heroContent}>
-          <View style={styles.heroTextContainer}>
-            <View style={styles.heroBadgeContainer}>
-              <Text style={styles.heroBadge}>✨ NO-COST EMIs</Text>
+      <Animated.View style={[styles.collapsibleHeader, { height: collapsibleHeaderHeight }]}>
+        <LinearGradient
+          colors={[colors.gradientStart, colors.gradientEnd]}
+          style={styles.hero}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View style={styles.heroContent}>
+            <View style={styles.heroTextContainer}>
+              <View style={styles.heroBadgeContainer}>
+                <Text style={styles.heroBadge}>✨ NO-COST EMIs</Text>
+              </View>
+              <Text style={styles.heroTitle}>
+                Shop today,{ '\n' }
+                <Text style={styles.heroItalic}>Pay later</Text> using{ '\n' }
+                <Text style={{ fontWeight: '800' }}>Mutual funds.</Text>
+              </Text>
+              <Text style={styles.heroSubtitle}>
+                No credit score required. No interest.{ '\n' }Backed by your investments.
+              </Text>
             </View>
-            <Text style={styles.heroTitle}>
-              Shop today,{'\n'}
-              <Text style={styles.heroItalic}>Pay later</Text> using{'\n'}
-              <Text style={{ fontWeight: '800' }}>Mutual funds.</Text>
-            </Text>
-            <Text style={styles.heroSubtitle}>
-              No credit score required. No interest.{'\n'}Backed by your investments.
-            </Text>
+            <View style={styles.heroDecoContainer}>
+              <Text style={styles.heroDecoLarge}>0%</Text>
+              <Text style={styles.heroDecoSmall}>INTEREST</Text>
+            </View>
           </View>
-          <View style={styles.heroDecoContainer}>
-            <Text style={styles.heroDecoLarge}>0%</Text>
-            <Text style={styles.heroDecoSmall}>INTEREST</Text>
-          </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
 
-      <View style={styles.toggleWrapper}>
-        <SegmentedToggle
-          options={SEGMENTS}
-          selectedKey={activeSegment}
-          onSelect={(key) => setActiveSegment(key as ShopSegment)}
-        />
-      </View>
+        <View style={styles.toggleWrapper}>
+          <SegmentedToggle
+            options={SEGMENTS}
+            selectedKey={activeSegment}
+            onSelect={(key) => setActiveSegment(key as ShopSegment)}
+          />
+        </View>
+      </Animated.View>
 
       <View style={styles.body}>
         {activeSegment === 'top_brands' && <TopBrandsView />}
         {activeSegment === 'nearby_stores' && <NearbyStoresView />}
         {activeSegment === 'marketplace' && (
-          <MarketplaceTab onSelectProduct={handleSelectProduct} />
+          <MarketplaceTab
+            onSelectProduct={handleSelectProduct}
+            onScroll={handleMarketplaceScroll}
+          />
         )}
       </View>
     </View>
@@ -241,6 +264,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  collapsibleHeader: {
+    overflow: 'hidden',
   },
   hero: {
     paddingHorizontal: spacing.xl,
