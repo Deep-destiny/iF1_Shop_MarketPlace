@@ -60,6 +60,18 @@ npm run android
 npm run ios
 ```
 
+## Deploy to Vercel
+
+This project can be deployed to Vercel as a static Expo web build.
+
+1. Import `https://github.com/Deep-destiny/iF1_Shop_MarketPlace` into Vercel.
+2. Keep the framework preset as `Other`.
+3. Use `npm run build:web` as the build command.
+4. Use `dist` as the output directory.
+5. Deploy.
+
+The repository includes `vercel.json` with these settings, so Vercel can also detect them automatically.
+
 ## Validation
 
 Run the TypeScript check with:
